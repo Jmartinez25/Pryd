@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.pryd.app.presentation.activity.AddEditScreen
 import com.pryd.app.presentation.board.BoardScreen
+import com.pryd.app.presentation.pomodoro.PomodoroScreen
 
 @Composable
 fun PrydNavHost() {
@@ -69,7 +70,7 @@ fun PrydNavHost() {
                 )
             }
             composable(Screen.Pomodoro.route) {
-                // TODO: PomodoroScreen()
+                PomodoroScreen()
             }
             composable(Screen.AddEditActivity.route) {
                 AddEditScreen(
