@@ -11,6 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.pryd.app.presentation.activity.AddEditScreen
+import com.pryd.app.presentation.board.BoardScreen
 
 @Composable
 fun PrydNavHost() {
@@ -60,10 +62,21 @@ fun PrydNavHost() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Board.route) {
-                // TODO: BoardScreen()
+                BoardScreen(
+                    onAddClick = {
+                        navController.navigate(Screen.AddEditActivity.route)
+                    }
+                )
             }
             composable(Screen.Pomodoro.route) {
                 // TODO: PomodoroScreen()
+            }
+            composable(Screen.AddEditActivity.route) {
+                AddEditScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
         }
     }
