@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -139,7 +140,7 @@ fun PomodoroScreen(
                     )
                 ) {
                     Icon(
-                        imageVector = if (uiState.isRunning) Icons.Filled.PlayArrow else Icons.Filled.PlayArrow,
+                        imageVector = if (uiState.isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         contentDescription = if (uiState.isRunning) "Pausar" else "Iniciar",
                         modifier = Modifier.size(28.dp)
                     )

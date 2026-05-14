@@ -14,8 +14,7 @@ import com.pryd.app.presentation.components.ActivityCard
 fun ActivityColumn(
     activities: List<Activity>,
     onMoveToInProgress: ((String) -> Unit)? = null,
-    onMoveToCompleted: ((String) -> Unit)? = null,
-    onDelete: (String) -> Unit
+    onMoveToCompleted: ((String) -> Unit)? = null
 ) {
     if (activities.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -36,8 +35,7 @@ fun ActivityColumn(
                     onMoveClick = {
                         onMoveToInProgress?.invoke(activity.id)
                         onMoveToCompleted?.invoke(activity.id)
-                    },
-                    onDeleteClick = { onDelete(activity.id) }
+                    }
                 )
             }
         }
@@ -57,8 +55,7 @@ fun CompletedColumn(
         items(activities, key = { it.id }) { activity ->
             ActivityCard(
                 activity = activity,
-                onMoveClick = null,
-                onDeleteClick = { onDelete(activity.id) }
+                onMoveClick = null
             )
         }
         if (activities.isNotEmpty()) {
