@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import com.pryd.app.data.local.PrydDatabase
 import com.pryd.app.data.local.dao.ActivityDao
-import com.pryd.app.data.local.dao.PomodoroSessionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,8 +30,4 @@ object DatabaseModule {
         return database.activityDao
     }
 
-    @Provides
-    fun providePomodoroSessionDao(database: PrydDatabase): PomodoroSessionDao {
-        return database.pomodoroSessionDao
-    }
 }

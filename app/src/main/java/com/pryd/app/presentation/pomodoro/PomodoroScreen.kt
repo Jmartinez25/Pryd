@@ -1,17 +1,30 @@
 package com.pryd.app.presentation.pomodoro
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pryd.app.presentation.theme.PomodoroBreak
 import com.pryd.app.presentation.theme.PomodoroFocus
+import com.pryd.app.presentation.theme.StatusPending
+import kotlin.math.cos
+import kotlin.math.sin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,47 +70,61 @@ fun PomodoroScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(250.dp)
             ) {
-                CircularProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxSize(),
-                    strokeWidth = 10.dp,
-                    color = timerColor,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(250.dp)
+                ) {
+                    PomodoroTimerArc(
+                        progress = { progress },
+                        timerColor = { timerColor },
+                        modifier = Modifier.fillMaxSize()
+                    )
 
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = formatTime(uiState.timeRemaining),
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = when (uiState.sessionType) {
-                            "FOCUS" -> "ENFOQUE"
-                            "SHORT_BREAK" -> "DESCANSO CORTO"
-                            "LONG_BREAK" -> "DESCANSO LARGO"
-                            else -> ""
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        color = timerColor
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = formatTime(uiState.timeRemaining),
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = when (uiState.sessionType) {
+                                "FOCUS" -> "ENFÓCATE"
+                                "SHORT_BREAK" -> "DESCANSO CORTO"
+                                "LONG_BREAK" -> "DESCANSO LARGO"
+                                else -> ""
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = timerColor
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Controls
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Reset
-                OutlinedButton(onClick = { viewModel.reset() }) {
-                    Text("↺")
+
+                OutlinedButton(
+                    onClick = { viewModel.reset() },
+                    modifier = Modifier.size(48.dp),
+                    shape = CircleShape,
+                    contentPadding = PaddingValues(0.dp),
+                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF78909C))
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Reiniciar",
+                        tint = Color(0xFF78909C)
+                    )
                 }
 
-                // Play/Pause
                 Button(
                     onClick = {
                         if (uiState.isRunning) viewModel.pause()
@@ -105,34 +132,88 @@ fun PomodoroScreen(
                     },
                     modifier = Modifier.size(64.dp),
                     shape = CircleShape,
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = timerColor,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
-                    Text(
-                        text = if (uiState.isRunning) "⏸" else "▶",
-                        fontSize = 24.sp
+                    Icon(
+                        imageVector = if (uiState.isRunning) Icons.Filled.PlayArrow else Icons.Filled.PlayArrow,
+                        contentDescription = if (uiState.isRunning) "Pausar" else "Iniciar",
+                        modifier = Modifier.size(28.dp)
                     )
                 }
 
-                // Skip
-                OutlinedButton(onClick = { viewModel.skip() }) {
-                    Text("⏭")
-                }
-            }
+                    OutlinedButton(
+                        onClick = { viewModel.skip() },
+                        modifier = Modifier.size(48.dp),
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(0.dp),
+                        border = ButtonDefaults.outlinedButtonBorder.copy(
+                            brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF78909C))
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Saltar descanso",
+                            tint = Color(0xFF78909C)
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Completed sessions today
-            if (uiState.completedSessions > 0) {
-                Text(
-                    text = "🍅".repeat(uiState.completedSessions),
-                    fontSize = 24.sp
-                )
-                Text(
-                    text = "${uiState.completedSessions} pomodoros completados hoy",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
+        }
+    }
+}
+
+@Composable
+private fun PomodoroTimerArc(
+    progress: () -> Float,
+    timerColor: () -> Color,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val currentProgress = progress()
+        val currentColor = timerColor()
+
+        val strokeWidth = 10.dp.toPx()
+        val radius = (size.minDimension - strokeWidth) / 2
+        val topLeft = Offset(
+            (size.width - radius * 2) / 2,
+            (size.height - radius * 2) / 2
+        )
+        val arcSize = Size(radius * 2, radius * 2)
+
+        drawArc(
+            color = StatusPending,
+            startAngle = -90f,
+            sweepAngle = -360f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+
+        drawArc(
+            color = currentColor,
+            startAngle = -90f,
+            sweepAngle = -360f * currentProgress,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+
+        if (currentProgress > 0f) {
+            val angleRad = Math.toRadians((-90.0 + -360.0 * currentProgress))
+            val thumbX = center.x + radius * cos(angleRad).toFloat()
+            val thumbY = center.y + radius * sin(angleRad).toFloat()
+
+            drawCircle(
+                color = currentColor,
+                radius = strokeWidth / 2 + 4.dp.toPx(),
+                center = Offset(thumbX, thumbY)
+            )
         }
     }
 }
