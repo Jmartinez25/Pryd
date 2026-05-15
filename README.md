@@ -108,7 +108,7 @@ app/
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/pryd.git
+git clone https://github.com/Jmartinez25/pryd.git
 
 # Abrir en Android Studio
 # File > Open > seleccionar la carpeta del proyecto
